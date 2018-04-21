@@ -31,6 +31,9 @@ class Menu:
             if user_entry not in inputs.keys():
                 continue
             
+            print(user_entry)
+            print(inputs[user_entry])
+
             return inputs[user_entry]['function']
 
     def add_entry(self):
@@ -79,9 +82,12 @@ class Menu:
                 print("{}) {}".format(key, value['text']))
             user_entry = input("> ").lower()
 
+            print(user_entry)
+            print(inputs[user_entry])
+
             if user_entry not in inputs.keys():
                 continue
-            
+            print(inputs[user_entry]['function'])
             return inputs[user_entry]['function']
 
     def quit_program(self):
@@ -89,16 +95,24 @@ class Menu:
         self.quit = True
     
     def search_exact_date(self):
-        pass
+        print('SEARCH_EXACT_DATE')
+        print('going back to main menu')
+        return self.main_menu
     
     def search_date_range(self):
-        pass
+        print('SEARCH_DATE_RANGE')
+        print('going back to main menu')
+        return self.main_menu
     
     def search_exact_search(self):
-        pass
+        print('SEARCH EXACT')
+        print('going back to main menu')
+        return self.main_menu
     
     def search_regex(self):
-        pass
+        print('REGEX')
+        print('going back to main menu')
+        return self.main_menu
 
 
 
