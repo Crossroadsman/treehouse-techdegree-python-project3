@@ -4,15 +4,15 @@ class Menu:
 
     # CONSTANTS
     DATE_FORMATS = {
-        'default': {'UI format': 'yyyy-mm-dd',
+        'iso 8601': {'UI format': 'yyyy-mm-dd',
                      'datetime format': '%Y-%m-%d'
-                   },
-        'uk':      {'UI format': 'dd/mm/yyyy',
-                    'datetime format': '%d/%m/%Y'
-                   },
-        'us':      {'UI format': 'mm/dd/yyyy',
-                    'datetime format': '%m/%d/%Y'
-                   },
+                    },
+        'uk':       {'UI format': 'dd/mm/yyyy',
+                     'datetime format': '%d/%m/%Y'
+                    },
+        'us':       {'UI format': 'mm/dd/yyyy',
+                     'datetime format': '%m/%d/%Y'
+                    },
     }
     
     # STATUS VARIABLES
@@ -21,7 +21,7 @@ class Menu:
     # INITIALIZERS
     def __init__(self):
         self.OPTIONS = {
-            'date format' : self.DATE_FORMATS['default']
+            'date format' : self.DATE_FORMATS['iso 8601']
         }
 
         menu = self.main_menu()
@@ -93,14 +93,16 @@ class Menu:
         '''This is the search menu. The user selects how they want to search.
         '''
         inputs = {
-            'd' : {'text': 'exact Date',
+            'd' : {'text': 'single Date',
                    'function': self.search_exact_date},
-            'r' : {'text': 'Range of dates',
-                   'function': self.search_date_range},
-            's' : {'text': 'exact Search',
-                   'function': self.search_exact_search},
-            'x' : {'text': 'use regeX pattern',
-                   'function': self.search_regex},
+            #'r' : {'text': 'date Range',
+            #       'function': self.search_date_range},
+            't' : {'text': 'Time spent',
+                   'function': self.search_time_spent}
+            's' : {'text': 'text Search',
+                   'function': self.search_text_search},
+            'x' : {'text': 'regeX pattern search',
+                   'function': self.search_regex_search},
             'b' : {'text': 'Back to main menu',
                    'function': self.main_menu}
         }
@@ -124,39 +126,51 @@ class Menu:
         self.quit = True
     
     def search_exact_date(self):
-        '''This is the menu where the user specifies a date to search by
+        '''This is the menu where the user browses dates and entries and picks
+        the date from a list
         '''
-        while True:
-            print("\nSEARCH EXACT DATE")
-            print("Enter the date")
-            date_format = self.OPTIONS['date format']
-            input_text = "Please use the '{}' date format: "
-            user_entry = input(input_text.format(date_format['UI format']))
-            # validate date entry
-            validated = self.validate_date_entry(user_entry, date_format)
-            if validated[0] != None:  # error
-                print(validated[0])
-                continue
-            else:
-                print(validated[1])    
-            
-            # call method to write data to file
-            return self.main_menu
+        print("\nSEARCH EXACT DATE")
+        print('going back to main menu')
+        return self.main_menu
     
     def search_date_range(self):
-        print('SEARCH_DATE_RANGE')
+        print('SEARCH DATE RANGE')
         print('going back to main menu')
         return self.main_menu
     
-    def search_exact_search(self):
-        print('SEARCH EXACT')
+    def search_time_spent(self):
+        '''This is the menu where the user enters the number of minutes a task
+        took and be able to choose one to see entries from
+        '''
+        print('SEARCH BY TIME SPENT')
+        print('going back to main menu')
+        return self.main_menu
+
+    def search_text_search(self):
+        '''This is the menu where the user enters a text string and is presented
+        with all entries containing that string in the task name or notes
+        '''
+        print('SEARCH USING TEXT STRING')
         print('going back to main menu')
         return self.main_menu
     
-    def search_regex(self):
+    def search_regex_search(self):
+        '''This menu is just like `search_text_search` except the user provides
+        a regex pattern instead of a text string
+        '''
         print('REGEX')
         print('going back to main menu')
         return self.main_menu
+    
+    # Other UI Methods
+    def display_entry(self, entry):
+        '''This method displays a selected entry, showing:
+        - date (read from file in iso 8601 and displayed in whatever is set in options)
+        - task name
+        - time taken
+        - any notes
+        '''
+        print("TO DO")
 
     # Helper Methods
     def validate_date_entry(self, date_string, date_format):
