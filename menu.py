@@ -1,12 +1,34 @@
+import datetime
+
 class Menu:
 
+    # CONSTANTS
+    DATE_FORMATS = {
+        'default': {'UI format': 'yyyy-mm-dd',
+                     'datetime format': '%Y-%m-%d'
+                   },
+        'uk':      {'UI format': 'dd/mm/yyyy',
+                    'datetime format': '%d/%m/%Y'
+                   },
+        'us':      {'UI format': 'mm/dd/yyyy',
+                    'datetime format': '%m/%d/%Y'
+                   },
+    }
+    
+    # STATUS VARIABLES
     quit = False
 
+    # INITIALIZERS
     def __init__(self):
+        self.OPTIONS = {
+            'date format' : self.DATE_FORMATS['default']
+        }
+
         menu = self.main_menu()
         while self.quit != True:
             menu = menu()
 
+    # MENU METHODS
     def main_menu(self):
         '''This is the root menu. The user selects which activity to perform
         and then the method returns the function for the activity.
@@ -42,10 +64,17 @@ class Menu:
         while True:
             print("\nADD ENTRY")
             print("Date of the Task")
-            date_format = 'yyyy-mm-dd'
+            date_format = self.OPTIONS['date format']
             input_text = "Please use the '{}' date format: "
-            user_entry = input(input_text.format(date_format))
+            user_entry = input(input_text.format(date_format['UI format']))
             # validate date entry
+            validated = self.validate_date_entry(user_entry, date_format)
+            if validated[0] != None:  # error
+                print(validated[0])
+                continue
+            else:
+                print(validated[1])
+
             print("Time spent")
             input_text = input("Enter a whole number of minutes (rounded) ")
             time_spent = input_text
@@ -95,9 +124,24 @@ class Menu:
         self.quit = True
     
     def search_exact_date(self):
-        print('SEARCH_EXACT_DATE')
-        print('going back to main menu')
-        return self.main_menu
+        '''This is the menu where the user specifies a date to search by
+        '''
+        while True:
+            print("\nSEARCH EXACT DATE")
+            print("Enter the date")
+            date_format = self.OPTIONS['date format']
+            input_text = "Please use the '{}' date format: "
+            user_entry = input(input_text.format(date_format['UI format']))
+            # validate date entry
+            validated = self.validate_date_entry(user_entry, date_format)
+            if validated[0] != None:  # error
+                print(validated[0])
+                continue
+            else:
+                print(validated[1])    
+            
+            # call method to write data to file
+            return self.main_menu
     
     def search_date_range(self):
         print('SEARCH_DATE_RANGE')
@@ -113,6 +157,29 @@ class Menu:
         print('REGEX')
         print('going back to main menu')
         return self.main_menu
+
+    # Helper Methods
+    def validate_date_entry(self, date_string, date_format):
+        '''Takes a date_string and date_format and attempts to create
+        a valid datetime object with those imports.
+        Returns a tuple in the form (error, datetime) where:
+        - `error` is None if valid and a description of the error text if 
+          invalid;
+        - `datetime` is a datetime object if valid and None if invalid
+        '''
+        try:
+            naive_datetime = datetime.datetime.strptime(date_string, 
+                                                        date_format['datetime format'])
+        except ValueError:
+            error_text = "{date_string} is not a valid date in the format {date_format}"
+            error_args = {"date_string": date_string,
+                          "date_format": date_format['UI format']}
+            return (error_text.format(**error_args), None)
+        else:
+            return (None, naive_datetime)
+
+
+
 
 
 
