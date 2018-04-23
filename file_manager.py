@@ -1,11 +1,19 @@
 class FileManager:
 
     def load_file(self, filename):
-        file_handle = open(filename, 'r')
-        file_data = []
-        for line in file_handle.readlines():
-            file_data.append(line)
-        file_handle.close()
+        file_data = None
+        while file_data is None:
+            try:
+                file_handle = open(filename, 'r')
+            except FileNotFoundError:
+                print("{} not found.".format(filename))
+                print("please try an alternative filename")
+                filename = input("> ")
+            else:
+                file_data = []
+                for line in file_handle.readlines():
+                    file_data.append(line)
+                    file_handle.close()
         return file_data
     
     def save_file(self, file_data, filename):
@@ -27,6 +35,4 @@ if __name__ == "__main__":
     
     print("test2: file write")
     file_manager = FileManager()
-    test_string = "this is a test"
-    file_manager = FileManager()
-    file_data = file_manager.
+    file_manager.save_file("dummy data", 'test.txt')
