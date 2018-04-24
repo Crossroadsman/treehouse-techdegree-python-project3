@@ -13,12 +13,12 @@ class FileManager:
                 file_data = []
                 for line in file_handle.readlines():
                     file_data.append(line)
-                    file_handle.close()
+                file_handle.close()
         return file_data
     
     def save_file(self, file_data, filename):
         file_handle = open(filename, 'a')
-        file_handle.write('hello, world')
+        file_handle.write('hello, world') # do we need to add a trailing newline?
         file_handle.close()
 
 
