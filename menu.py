@@ -77,18 +77,12 @@ class Menu:
         while True:
             print("\nADD ENTRY")
             print("Date of the Task")
-            date_format = self.OPTIONS['date format']
-            input_text = "Please use the '{}' date format: "
-            user_entry = input(input_text.format(date_format['UI format']))
-            # validate date entry
-            validated = self.validate_date_entry(user_entry, date_format)
-            if validated[0] != None:  # error
-                print(validated[0])
+            user_entry = self.date_entry()
+            if user_entry[0] != None:  # error
+                print(user_entry[0])
                 continue
             else:
-                save_format_date = self.OPTIONS['save format (date)']
-                date_format = save_format_date['datetime format']
-                date = validated[1].strftime(date_format)
+                date = user_entry[1]
             print("Name of the Task") 
             input_text = input("Enter the name of the task > ")
             task_name = input_text
@@ -114,7 +108,7 @@ class Menu:
         options
         '''
         print('OPTIONS')
-        print("Choose a displau date format")
+        print("Choose a display date format")
         
         menu_choices = list(self.DATE_FORMATS.keys())
         menu_size = len(menu_choices)
@@ -173,6 +167,25 @@ class Menu:
         the date from a list
         '''
         print("\nSEARCH EXACT DATE")
+        # load the csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        print(csv_data)
+        date_records = self.get_column(csv_data,
+                                       self.HEADERS['date'],
+                                       unique=True)
+        for i, value in enumerate(date_records):
+            print("{}) {}".format(i + 1, value))
+        user_input = input("> ")
+        # perform input validation
+        user_input = int(user_input) - 1
+        selected_date = date_records[user_input]
+        # when a date is selected, show all the entries with that date
+        matching_records = self.get_matching_records(csv_data,
+                                                     self.HEADERS['date'],
+                                                     selected_date)
+        for record in matching_records:
+            print(record)
         print('going back to main menu')
         return self.main_menu
     
@@ -237,6 +250,46 @@ class Menu:
             return (error_text.format(**error_args), None)
         else:
             return (None, naive_datetime)
+    
+    def date_entry(self):
+        '''This helper function asks for a date input in the user's preferred
+        format and then returns that date as a naive datetime object
+        '''
+        date_format = self.OPTIONS['date format']
+        input_text = "Please use the '{}' date format: "
+        user_entry = input(input_text.format(date_format['UI format']))
+        # validate date entry
+        validated = self.validate_date_entry(user_entry, date_format)
+        if validated[0] != None:  # error
+            return validated
+        else:
+            save_format_date = self.OPTIONS['save format (date)']
+            date_format = save_format_date['datetime format']
+            date = validated[1].strftime(date_format)
+            return (None, date)
+
+    def get_column(self, data_set, field_title, unique=False):
+        '''takes a data set and the name of a column and returns a list of all
+        records in that column.
+        
+        If unique is set to True, returns only unique values (while
+        preserving order)'''
+        items = [row[field_title] for row in data_set] 
+        if not unique:
+            return items
+        else:
+            unique_items = []
+            for item in items:
+                if item not in unique_items:
+                    unique_items.append(item)
+            return unique_items
+    
+    def get_matching_records(self, data_set, field_title, value):
+        '''takes a data set and the name of a column and a value and returns
+        all the rows where the specified column has the specified value
+        '''
+        return [row for row in data_set if row[field_title] == value]
+
 
 
 
