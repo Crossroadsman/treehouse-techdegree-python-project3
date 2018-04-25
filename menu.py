@@ -110,8 +110,11 @@ class Menu:
             return self.main_menu
 
     def options(self):
+        '''This is the menu where the user can specify user-configurable
+        options
+        '''
         print('OPTIONS')
-        print("Choose a date format")
+        print("Choose a displau date format")
         
         menu_choices = list(self.DATE_FORMATS.keys())
         menu_size = len(menu_choices)
