@@ -64,6 +64,12 @@ class CsvManager:
         the whole file). Otherwise the file will be created/appended as
         necessary.
         '''
+
+        print("inputs:")
+        print('file_data: {}'.format(file_data))
+        print('filename: {}'.format(filename))
+        print('field_names: {}'.format(field_names))
+
         if truncate:
             file_handle = open(filename, mode='w')
             new_file = True

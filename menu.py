@@ -1,5 +1,8 @@
 import datetime
 
+from csv_manager import CsvManager
+
+
 class Menu:
 
     # CONSTANTS
@@ -14,6 +17,15 @@ class Menu:
                      'datetime format': '%m/%d/%Y'
                     },
     }
+
+    HEADERS = {
+        'date': 'Date',
+        'task_name': 'Task Name',
+        'duration': 'Duration (minutes)',
+        'notes': 'Notes'
+    }
+
+    DATASTORE_FILENAME = 'temp.csv'
     
     # STATUS VARIABLES
     quit = False
@@ -21,7 +33,8 @@ class Menu:
     # INITIALIZERS
     def __init__(self):
         self.OPTIONS = {
-            'date format' : self.DATE_FORMATS['iso 8601']
+            'date format' : self.DATE_FORMATS['iso 8601'],
+            'save format (date)'  : self.DATE_FORMATS['iso 8601'],
         }
 
         menu = self.main_menu()
@@ -73,8 +86,12 @@ class Menu:
                 print(validated[0])
                 continue
             else:
-                print(validated[1])
-
+                save_format_date = self.OPTIONS['save format (date)']
+                date_format = save_format_date['datetime format']
+                date = validated[1].strftime(date_format)
+            print("Name of the Task") 
+            input_text = input("Enter the name of the task > ")
+            task_name = input_text
             print("Time spent")
             input_text = input("Enter a whole number of minutes (rounded) ")
             time_spent = input_text
@@ -82,11 +99,34 @@ class Menu:
             input_text = input("(Optional, leave blank for none) ")
             notes = input_text
             # call method to write data to file
+            csvm = CsvManager()
+            file_data = [{
+                self.HEADERS['date']: date,
+                self.HEADERS['task_name']: task_name,
+                self.HEADERS['duration']: time_spent,
+                self.HEADERS['notes']: notes
+            }]
+            csvm.save_csv(file_data, self.DATASTORE_FILENAME)
             return self.main_menu
 
     def options(self):
         print('OPTIONS')
-        print('going back to main menu')
+        print("Choose a date format")
+        
+        menu_choices = list(self.DATE_FORMATS.keys())
+        menu_size = len(menu_choices)
+
+        for i in range(len(menu_choices)):
+            print("({}) - {}".format(i + 1, menu_choices[i]))
+        input_text = input("> ")
+        if input_text in [str(x) for x in range(1, menu_size + 1)]:
+            choice = int(input_text) - 1
+            choice = menu_choices[choice]
+            print("You chose: {}".format(choice))
+            self.OPTIONS['date format'] = self.DATE_FORMATS[choice]
+            print('going back to main menu')
+        else:
+            print("Invalid entry, returning to main menu")
         return self.main_menu
 
     def search_entries(self):
@@ -95,10 +135,10 @@ class Menu:
         inputs = {
             'd' : {'text': 'single Date',
                    'function': self.search_exact_date},
-            #'r' : {'text': 'date Range',
-            #       'function': self.search_date_range},
+            'r' : {'text': 'date Range',
+                   'function': self.search_date_range},
             't' : {'text': 'Time spent',
-                   'function': self.search_time_spent}
+                   'function': self.search_time_spent},
             's' : {'text': 'text Search',
                    'function': self.search_text_search},
             'x' : {'text': 'regeX pattern search',
@@ -134,6 +174,9 @@ class Menu:
         return self.main_menu
     
     def search_date_range(self):
+        '''This is the menu where the user can enter a from date and to date
+        and get back every entry from within that range
+        '''
         print('SEARCH DATE RANGE')
         print('going back to main menu')
         return self.main_menu
