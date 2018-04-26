@@ -248,6 +248,25 @@ class Menu:
         took and be able to choose one to see entries from
         '''
         print('SEARCH BY TIME SPENT')
+        print("Time spent")
+        input_text = input("Enter a whole number of minutes (rounded) ")
+        time_spent = input_text
+        # load csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        field_title = self.HEADERS['duration']
+        matching_records = self.get_matching_records(csv_data,
+                                                     field_title,
+                                                     time_spent)
+        print("\nShowing entries:")
+        if len(matching_records) == 0:
+                print("no matching records found")
+        else:
+            for record in matching_records:
+                if len(matching_records) == 1:
+                    self.display_entry(record, verbose=True)
+                else:
+                    self.display_entry(record)
         print('going back to main menu')
         return self.main_menu
 
