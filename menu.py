@@ -262,19 +262,17 @@ class Menu:
         else:
             current_date = start_date
         print("\nShowing entries:")
+        matching_records = []
         while current_date <= end_date:
             #   show entries
             date_string = self.date_to_string(current_date, target='file')
-            matching_records = self.get_matching_records(csv_data,
-                                                         self.HEADERS['date'],
-                                                         date_string)
-            for record in matching_records:
-                self.display_entry(record)
-            
+            matching_records += self.get_matching_records(csv_data,
+                                                          self.HEADERS['date'],
+                                                          date_string)
             current_date = current_date + datetime.timedelta(days=1)
         
-        print('going back to main menu')
-        return self.main_menu
+        self.records = matching_records
+        return self.present_results()
     
     def search_time_spent(self):
         '''This is the menu where the user enters the number of minutes a task
@@ -291,17 +289,8 @@ class Menu:
         matching_records = self.get_matching_records(csv_data,
                                                      field_title,
                                                      time_spent)
-        print("\nShowing entries:")
-        if len(matching_records) == 0:
-                print("no matching records found")
-        else:
-            for record in matching_records:
-                if len(matching_records) == 1:
-                    self.display_entry(record, verbose=True)
-                else:
-                    self.display_entry(record)
-        print('going back to main menu')
-        return self.main_menu
+        self.records = matching_records
+        return self.present_results()
 
     def search_text_search(self):
         '''This is the menu where the user enters a text string and is presented
@@ -330,20 +319,8 @@ class Menu:
         for record in matching_records:
             if record not in uniques:
                 uniques += record
-        print("\nShowing entries:")
-        if len(uniques) == 0:
-                print("no matching records found")
-        else:
-            for record in uniques:
-                if len(uniques) == 1:
-                    #print(record)
-                    self.display_entry(record, verbose=True)
-                else:
-                    #print(record)
-                    self.display_entry(record)
-
-        print('going back to main menu')
-        return self.main_menu
+        self.records = uniques
+        return self.present_results()
     
     def search_regex_search(self):
         '''This menu is just like `search_text_search` except the user provides
@@ -372,19 +349,8 @@ class Menu:
         for record in matching_records:
             if record not in uniques:
                 uniques += record
-        print("\nShowing entries:")
-        if len(uniques) == 0:
-                print("no matching records found")
-        else:
-            for record in uniques:
-                if len(uniques) == 1:
-                    #print(record)
-                    self.display_entry(record, verbose=True)
-                else:
-                    #print(record)
-                    self.display_entry(record)
-        print('going back to main menu')
-        return self.main_menu
+        self.records = uniques
+        return self.present_results()
 
     def edit_record(self):
         print("edit record")
@@ -434,10 +400,16 @@ class Menu:
         match_index = int(user_input) - 1
         record = self.records[match_index]
         # load te csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
         # find the row that matches record
-        # delete that reow
+        for row in csv_data:
+            if row == record:
+                # delete that reow
+                csv_data.remove(row)
+                break
         # save the csv
-        print(record)
+        csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
         return self.main_menu
 
     # Other UI Methods
