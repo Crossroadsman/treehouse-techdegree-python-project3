@@ -393,12 +393,38 @@ class Menu:
         match_index = int(user_input) - 1
         record = self.records[match_index]
         # get the new values for the record
+        while True:
+            print("New date of the Task")
+            user_entry = self.date_entry()
+            if user_entry[0] != None:  # error
+                print(user_entry[0])
+                continue
+            else:
+                date = user_entry[1]
+                date_string = self.date_to_string(date, target='file')
+            print("New name of the Task") 
+            input_text = input("Enter the name of the task > ")
+            task_name = input_text
+            print("New time spent")
+            input_text = input("Enter a whole number of minutes (rounded) ")
+            time_spent = input_text
+            print("New notes")
+            input_text = input("(Optional, leave blank for none) ")
+            notes = input_text
+            break
         # load the csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
         # find the row that matches record
-        # replace that row with the new row
+        for row in csv_data:
+            if row == record:
+                print("match: {}".format(row))
+                row[self.HEADERS['date']] = date_string
+                row[self.HEADERS['task_name']] = task_name
+                row[self.HEADERS['duration']] = time_spent
+                row[self.HEADERS['notes']] = notes
         # save the csv
-        
-        print(record)
+        csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
         return self.main_menu
     
     def delete_record(self):
