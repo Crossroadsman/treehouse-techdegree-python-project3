@@ -185,7 +185,10 @@ class Menu:
                                                      self.HEADERS['date'],
                                                      selected_date)
         for record in matching_records:
-            print(record)
+            if len(matching_records) == 1:
+                self.display_entry(record, verbose=True)
+            else:
+                self.display_entry(record)
         print('going back to main menu')
         return self.main_menu
     
@@ -194,6 +197,11 @@ class Menu:
         and get back every entry from within that range
         '''
         print('SEARCH DATE RANGE')
+        # get from_date
+        # get to_date
+        # loop through every loop in range (inclusive)
+        #   enumerate entry
+        
         print('going back to main menu')
         return self.main_menu
     
@@ -222,14 +230,28 @@ class Menu:
         return self.main_menu
     
     # Other UI Methods
-    def display_entry(self, entry):
+    def display_entry(self, entry, verbose=False):
         '''This method displays a selected entry, showing:
         - date (read from file in iso 8601 and displayed in whatever is set in options)
         - task name
         - time taken
         - any notes
         '''
-        print("TO DO")
+        date = entry[self.HEADERS['date']]
+        task_name = entry[self.HEADERS['task_name']]
+        time_taken = entry[self.HEADERS['duration']]
+        notes = entry[self.HEADERS['notes']]
+        if verbose:
+            line1 = "{}: {}".format(date, task_name) 
+            print(line1)
+            print("-" * len(line1))
+            print("{} minutes".format(time_taken))
+            print("{}".format(notes))
+        else:
+            print("{} ({}m): {} | {}".format(date,
+                                             time_taken,
+                                             task_name,
+                                             notes))
 
     # Helper Methods
     def validate_date_entry(self, date_string, date_format):
