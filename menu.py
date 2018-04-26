@@ -35,6 +35,7 @@ class Menu:
         self.OPTIONS = {
             'date format' : self.DATE_FORMATS['iso 8601'],
             'save format (date)'  : self.DATE_FORMATS['iso 8601'],
+            'case sensitive search' : False
         }
 
         menu = self.main_menu()
@@ -109,11 +110,10 @@ class Menu:
         options
         '''
         print('OPTIONS')
+
         print("Choose a display date format")
-        
         menu_choices = list(self.DATE_FORMATS.keys())
         menu_size = len(menu_choices)
-
         for i in range(len(menu_choices)):
             print("({}) - {}".format(i + 1, menu_choices[i]))
         input_text = input("> ")
@@ -125,6 +125,7 @@ class Menu:
             print('going back to main menu')
         else:
             print("Invalid entry, returning to main menu")
+
         return self.main_menu
 
     def search_entries(self):
@@ -274,7 +275,41 @@ class Menu:
         '''This is the menu where the user enters a text string and is presented
         with all entries containing that string in the task name or notes
         '''
+        text_headers = [
+            self.HEADERS['task_name'],
+            self.HEADERS['notes']
+        ]
         print('SEARCH USING TEXT STRING')
+        print("Enter the text string to search on")
+        input_text = input("> ")
+        text_string = input_text
+        # load csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        # perform search
+        matching_records = []
+        for header in text_headers:
+            matches_for_header = self.get_records_containing(csv_data,
+                                                             header,
+                                                             text_string)
+            if len(matches_for_header) > 0:
+                matching_records.append(matches_for_header)
+        uniques = []
+        for record in matching_records:
+            if record not in uniques:
+                uniques += record
+        print("\nShowing entries:")
+        if len(uniques) == 0:
+                print("no matching records found")
+        else:
+            for record in uniques:
+                if len(uniques) == 1:
+                    #print(record)
+                    self.display_entry(record, verbose=True)
+                else:
+                    #print(record)
+                    self.display_entry(record)
+
         print('going back to main menu')
         return self.main_menu
     
@@ -379,7 +414,22 @@ class Menu:
         all the rows where the specified column has the specified value
         '''
         return [row for row in data_set if row[field_title] == value]
-
+    
+    def get_records_containing(self, data_set, field_title, value):
+        '''takes a data set, the name of a column, value and returns all
+        the rows where the specified value appears in the specified column
+        '''
+        output_records = []
+        if self.OPTIONS['case sensitive search']:
+            for row in data_set:
+                if row[field_title].find(value) >= 0:
+                    output_records.append(row)
+        else:
+            for row in data_set:
+                if row[field_title].lower().find(value.lower()) >= 0:
+                    output_records.append(row)
+        
+        return output_records
 
 
 
