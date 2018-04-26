@@ -36,7 +36,7 @@ class Menu:
         self.OPTIONS = {
             'date format' : self.DATE_FORMATS['iso 8601'],
             'save format (date)'  : self.DATE_FORMATS['iso 8601'],
-            'case sensitive search' : False
+            'case sensitive search' : False,
         }
 
         menu = self.main_menu()
@@ -164,6 +164,42 @@ class Menu:
     def quit_program(self):
         print("Quitting")
         self.quit = True
+
+    def present_results(self):
+        '''Show all the results from the search and then provide interaction
+        choices
+        '''
+        inputs = {
+            'e' : {'text': 'Edit',
+                   'function': self.edit_record},
+            'd' : {'text': 'Delete',
+                   'function': self.delete_record},
+            'm' : {'text': 'go back to Main menu',
+                   'function': self.main_menu},
+            'q' : {'text': 'quit',
+                   'function': self.quit_program},
+        }
+        
+        print("\nSearch Results")
+        for index, value in enumerate(self.records):
+            short_form = self.display_entry(value, return_only=True)
+            print("{}) {}".format(index + 1, short_form))
+        
+        print("\nAvailable actions:")
+        for key, value in inputs.items():
+            print('{}) {}'.format(key, value['text']))
+
+        while True:
+            user_entry = input("> ").lower()
+
+            print(user_entry)
+            print(inputs[user_entry])
+
+            if user_entry not in inputs.keys():
+                continue
+            print(inputs[user_entry]['function'])
+            return inputs[user_entry]['function']
+        
     
     def search_exact_date(self):
         '''This is the menu where the user browses dates and entries and picks
@@ -187,13 +223,8 @@ class Menu:
         matching_records = self.get_matching_records(csv_data,
                                                      self.HEADERS['date'],
                                                      selected_date)
-        for record in matching_records:
-            if len(matching_records) == 1:
-                self.display_entry(record, verbose=True)
-            else:
-                self.display_entry(record)
-        print('going back to main menu')
-        return self.main_menu
+        self.records = matching_records
+        return self.present_results()
     
     def search_date_range(self):
         '''This is the menu where the user can enter a from date and to date
@@ -354,9 +385,37 @@ class Menu:
                     self.display_entry(record)
         print('going back to main menu')
         return self.main_menu
+
+    def edit_record(self):
+        print("edit record")
+        print('enter the record number to edit')
+        user_input = input("> ")
+        match_index = int(user_input) - 1
+        record = self.records[match_index]
+        # get the new values for the record
+        # load the csv
+        # find the row that matches record
+        # replace that row with the new row
+        # save the csv
+        
+        print(record)
+        return self.main_menu
     
+    def delete_record(self):
+        print("delete record")
+        print('enter the record number to delete')
+        user_input = input("> ")
+        match_index = int(user_input) - 1
+        record = self.records[match_index]
+        # load te csv
+        # find the row that matches record
+        # delete that reow
+        # save the csv
+        print(record)
+        return self.main_menu
+
     # Other UI Methods
-    def display_entry(self, entry, verbose=False):
+    def display_entry(self, entry, verbose=False, return_only=False):
         '''This method displays a selected entry, showing:
         - date (read from file in iso 8601 and displayed in whatever is set in options)
         - task name
@@ -374,10 +433,14 @@ class Menu:
             print("{} minutes".format(time_taken))
             print("{}".format(notes))
         else:
-            print("{} ({}m): {} | {}".format(date,
-                                             time_taken,
-                                             task_name,
-                                             notes))
+            short_form = "{} ({}m): {} | {}".format(date,
+                                                    time_taken,
+                                                    task_name,
+                                                    notes)
+            if return_only:
+                return short_form
+            else:
+                print(short_form)
 
     # Helper Methods
     def validate_date_entry(self, date_string, date_format):
