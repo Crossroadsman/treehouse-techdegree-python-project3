@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from csv_manager import CsvManager
 
@@ -317,7 +318,40 @@ class Menu:
         '''This menu is just like `search_text_search` except the user provides
         a regex pattern instead of a text string
         '''
-        print('REGEX')
+        text_headers = [
+            self.HEADERS['task_name'],
+            self.HEADERS['notes']
+        ]
+        print('SEARCH USING REGEX PATTERN')
+        print("Enter the pattern to search on")
+        input_text = input("> ")
+        pattern = input_text
+        # load csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        # perform search
+        matching_records = []
+        for header in text_headers:
+            matches_for_header = self.get_records_with_pattern(csv_data,
+                                                               header,
+                                                               pattern)
+            if len(matches_for_header) > 0:
+                matching_records.append(matches_for_header)
+        uniques = []
+        for record in matching_records:
+            if record not in uniques:
+                uniques += record
+        print("\nShowing entries:")
+        if len(uniques) == 0:
+                print("no matching records found")
+        else:
+            for record in uniques:
+                if len(uniques) == 1:
+                    #print(record)
+                    self.display_entry(record, verbose=True)
+                else:
+                    #print(record)
+                    self.display_entry(record)
         print('going back to main menu')
         return self.main_menu
     
@@ -430,6 +464,17 @@ class Menu:
                     output_records.append(row)
         
         return output_records
+
+    def get_records_with_pattern(self, data_set, field_title, pattern):
+        '''takes a data set, the name of a column, a pattern and returns
+        all the rows where the specified regex pattern appears in the
+        specified column rows
+        '''
+        def check_match(row):
+            return re.search(pattern, row[field_title]) is not None
+        
+        return [row for row in data_set if check_match(row)]
+
 
 
 
