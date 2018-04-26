@@ -83,6 +83,7 @@ class Menu:
                 continue
             else:
                 date = user_entry[1]
+                date_string = self.date_to_string(date, target='file')
             print("Name of the Task") 
             input_text = input("Enter the name of the task > ")
             task_name = input_text
@@ -95,7 +96,7 @@ class Menu:
             # call method to write data to file
             csvm = CsvManager()
             file_data = [{
-                self.HEADERS['date']: date,
+                self.HEADERS['date']: date_string,
                 self.HEADERS['task_name']: task_name,
                 self.HEADERS['duration']: time_spent,
                 self.HEADERS['notes']: notes
@@ -197,10 +198,47 @@ class Menu:
         and get back every entry from within that range
         '''
         print('SEARCH DATE RANGE')
-        # get from_date
-        # get to_date
+        start_date = None
+        end_date = None
+        # get start_date
+        while start_date is None:
+            print("Start Date:")
+            user_entry = self.date_entry()
+            if user_entry[0] != None:  # error
+                print(user_entry[0])
+                continue
+            else:
+                start_date = user_entry[1]
+        # get end_date
+        while end_date is None:
+            print("End Date:")
+            user_entry = self.date_entry()
+            if user_entry[0] != None:  # error
+                print(user_entry[0])
+                continue
+            else:
+                end_date = user_entry[1]
+        # load csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
         # loop through every loop in range (inclusive)
-        #   enumerate entry
+        if end_date < start_date:
+            current_date = end_date
+            end_date = start_date
+            start_date = end_date
+        else:
+            current_date = start_date
+        print("\nShowing entries:")
+        while current_date <= end_date:
+            #   show entries
+            date_string = self.date_to_string(current_date, target='file')
+            matching_records = self.get_matching_records(csv_data,
+                                                         self.HEADERS['date'],
+                                                         date_string)
+            for record in matching_records:
+                self.display_entry(record)
+            
+            current_date = current_date + datetime.timedelta(days=1)
         
         print('going back to main menu')
         return self.main_menu
@@ -282,13 +320,24 @@ class Menu:
         user_entry = input(input_text.format(date_format['UI format']))
         # validate date entry
         validated = self.validate_date_entry(user_entry, date_format)
-        if validated[0] != None:  # error
-            return validated
-        else:
-            save_format_date = self.OPTIONS['save format (date)']
-            date_format = save_format_date['datetime format']
-            date = validated[1].strftime(date_format)
-            return (None, date)
+        return validated
+    
+    def date_to_string(self, date_object, target='display'):
+        '''This helper function takes a naive date object and returns a 
+        string representation in:
+        - `target='display'`: the user's preferred display format
+        - `target='file': the save format
+        '''
+        if target == 'display':
+            option = self.OPTIONS['date format']
+            string_format = option['UI format']
+        elif target == 'file':
+            option = self.OPTIONS['save format (date)']
+            string_format = option['datetime format']
+        else:  # unrecognised target, fallback to write mode
+            option = self.OPTIONS['save format (date)']
+            string_format = option['datetime format']
+        return date_object.strftime(string_format)
 
     def get_column(self, data_set, field_title, unique=False):
         '''takes a data set and the name of a column and returns a list of all
