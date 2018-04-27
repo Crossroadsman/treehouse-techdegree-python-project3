@@ -195,7 +195,7 @@ class Menu:
         if self.current_page_start == 0:
             del(inputs['p'])
         next_start = self.current_page_start + self.OPTIONS['entries per page']
-        if next_page_start >= len(self.records):
+        if next_start >= len(self.records):
             del(inputs['n'])
         print("\nSearch Results")
         if len(self.records) > next_start:
