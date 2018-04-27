@@ -33,6 +33,8 @@ class Menu:
 
     # INITIALIZERS
     def __init__(self):
+        print("\nWORK LOG")
+        print("========")
         self.OPTIONS = {
             'date format' : self.DATE_FORMATS['iso 8601'],
             'save format (date)'  : self.DATE_FORMATS['iso 8601'],
@@ -61,7 +63,7 @@ class Menu:
                    'function': self.quit_program}
         }
         while True:
-            print("\nWORK LOG")
+            print("\nMAIN MENU")
             print("What would you like to do?")
             for key, value in inputs.items():
                 print("{}) {}".format(key, value['text']))
@@ -77,20 +79,31 @@ class Menu:
         '''
         while True:
             print("\nADD ENTRY")
-            print("Date of the Task")
-            user_entry = self.date_entry()
-            if user_entry[0] != None:  # error
-                print(user_entry[0])
-                continue
-            else:
-                date = user_entry[1]
-                date_string = self.date_to_string(date, target='file')
+            date = None
+            while date is None:
+                print("Date of the Task")
+                user_entry = self.date_entry()
+                if user_entry[0] != None:  # error
+                    print(user_entry[0])
+                    continue
+                else:
+                    date = user_entry[1]
+                    date_string = self.date_to_string(date, target='file')
             print("Name of the Task") 
             input_text = input("Enter the name of the task > ")
             task_name = input_text
-            print("Time spent")
-            input_text = input("Enter a whole number of minutes (rounded) ")
-            time_spent = input_text
+            time_spent = None
+            while time_spent is None:
+                print("Time spent")
+                input_text = input("Enter a whole number of minutes (rounded) ")
+                try:
+                    time_spent = int(input_text)
+                except ValueError:
+                    print("Invalid value, please try again")
+                    continue
+                if time_spent < 0:
+                    print("Invalid value, please try again")
+                    continue
             print("Notes")
             input_text = input("(Optional, leave blank for none) ")
             notes = input_text
@@ -275,14 +288,28 @@ class Menu:
                                        unique=True)
         for i, value in enumerate(date_records):
             print("{}) {}".format(i + 1, value))
-        user_input = input("> ")
-        # perform input validation
-        user_input = int(user_input) - 1
-        selected_date = date_records[user_input]
-        # when a date is selected, show all the entries with that date
-        matching_records = self.get_matching_records(csv_data,
-                                                     self.HEADERS['date'],
-                                                     selected_date)
+        selected_date = None
+        while selected_date is None:
+            user_input = input("> ")
+            # perform input validation
+            try:
+                user_input = int(user_input) - 1
+            except ValueError:
+                print("Invalid value, try again")
+                continue
+            if user_input < 0:
+                print("Value out of range. Try again.")
+                continue
+            try:
+                selected_date = date_records[user_input]
+            except IndexError:
+                print("Value out of range. Try again.")
+                continue
+            
+            # when a date is selected, show all the entries with that date
+            matching_records = self.get_matching_records(csv_data,
+                                                         self.HEADERS['date'],
+                                                         selected_date)
         self.records = matching_records
         return self.present_results()
     
@@ -340,8 +367,14 @@ class Menu:
         '''
         print('SEARCH BY TIME SPENT')
         print("Time spent")
-        input_text = input("Enter a whole number of minutes (rounded) ")
-        time_spent = input_text
+        time_spent = None
+        while time_spent is None:
+            input_text = input("Enter a whole number of minutes (rounded) ")
+            try:
+                time_spent = int(input_text)
+            except ValueError:
+                print("Invalid value")
+                continue
         # load csv
         csvm = CsvManager()
         csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
@@ -349,6 +382,9 @@ class Menu:
         matching_records = self.get_matching_records(csv_data,
                                                      field_title,
                                                      time_spent)
+        if len(matching_records) == 0:
+            print("\nNo matches, returning to search menu")
+            return self.search_entries
         self.records = matching_records
         return self.present_results()
 
@@ -530,7 +566,7 @@ class Menu:
         # find the row that matches record
         for row in csv_data:
             if row == record:
-                # delete that reow
+                # delete that row
                 csv_data.remove(row)
                 break
         # save the csv
