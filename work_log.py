@@ -26,7 +26,7 @@ class Menu:
         'notes': 'Notes'
     }
 
-    DATASTORE_FILENAME = 'temp.csv'
+    DATASTORE_FILENAME = 'work_log.csv'
     
     # STATUS VARIABLES
     quit = False
@@ -43,6 +43,7 @@ class Menu:
         }
         self.current_record = 0
         self.current_page_start = 0
+        
         menu = self.main_menu()
         while self.quit != True:
             menu = menu()
@@ -486,7 +487,6 @@ class Menu:
         # find the row that matches record
         for row in csv_data:
             if row == record:
-                print("match: {}".format(row))
                 row[self.HEADERS['date']] = date_string
                 row[self.HEADERS['task_name']] = task_name
                 row[self.HEADERS['duration']] = time_spent
@@ -531,7 +531,6 @@ class Menu:
         # find the row that matches record
         for row in csv_data:
             if row == record:
-                print("match: {}".format(row))
                 row[self.HEADERS['date']] = date_string
                 row[self.HEADERS['task_name']] = task_name
                 row[self.HEADERS['duration']] = time_spent
