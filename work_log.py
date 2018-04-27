@@ -386,7 +386,7 @@ class Menu:
         field_title = self.HEADERS['duration']
         matching_records = self.get_matching_records(csv_data,
                                                      field_title,
-                                                     time_spent)
+                                                     str(time_spent))
         if len(matching_records) == 0:
             print("\nNo matches, returning to search menu")
             return self.search_entries
