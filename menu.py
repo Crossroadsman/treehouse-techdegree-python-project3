@@ -70,9 +70,6 @@ class Menu:
             if user_entry not in inputs.keys():
                 continue
             
-            print(user_entry)
-            print(inputs[user_entry])
-
             return inputs[user_entry]['function']
 
     def add_entry(self):
@@ -155,12 +152,8 @@ class Menu:
                 print("{}) {}".format(key, value['text']))
             user_entry = input("> ").lower()
 
-            print(user_entry)
-            print(inputs[user_entry])
-
             if user_entry not in inputs.keys():
                 continue
-            print(inputs[user_entry]['function'])
             return inputs[user_entry]['function']
 
     def quit_program(self):
@@ -208,12 +201,8 @@ class Menu:
         while True:
             user_entry = input("> ").lower()
 
-            print(user_entry)
-            print(inputs[user_entry])
-
             if user_entry not in inputs.keys():
                 continue
-            print(inputs[user_entry]['function'])
             return inputs[user_entry]['function']
 
     def present_next_result(self):
@@ -249,12 +238,8 @@ class Menu:
         while True:
             user_entry = input("> ").lower()
 
-            print(user_entry)
-            print(inputs[user_entry])
-
             if user_entry not in inputs.keys():
                 continue
-            print(inputs[user_entry]['function'])
             return inputs[user_entry]['function']
     
     def previous_result(self):
@@ -285,7 +270,6 @@ class Menu:
         # load the csv
         csvm = CsvManager()
         csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
-        print(csv_data)
         date_records = self.get_column(csv_data,
                                        self.HEADERS['date'],
                                        unique=True)
