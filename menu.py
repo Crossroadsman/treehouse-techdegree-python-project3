@@ -37,8 +37,10 @@ class Menu:
             'date format' : self.DATE_FORMATS['iso 8601'],
             'save format (date)'  : self.DATE_FORMATS['iso 8601'],
             'case sensitive search' : False,
+            'entries per page' : 10,
         }
-
+        self.current_record = 0
+        self.current_page_start = 0
         menu = self.main_menu()
         while self.quit != True:
             menu = menu()
@@ -170,6 +172,12 @@ class Menu:
         choices
         '''
         inputs = {
+            'n' : {'text': 'Next page',
+                   'function': self.next_page},
+            'p' : {'text': 'Previous page',
+                   'function': self.previous_page},
+            'v' : {'text': 'View detail',
+                   'function': self.select_detail},
             'e' : {'text': 'Edit',
                    'function': self.edit_record},
             'd' : {'text': 'Delete',
@@ -179,9 +187,17 @@ class Menu:
             'q' : {'text': 'quit',
                    'function': self.quit_program},
         }
-        
+        if self.current_page_start == 0:
+            del(inputs['p'])
+        if self.current_page_start + self.OPTIONS['entries per page'] >= len(self.records):
+            del(inputs['n'])
         print("\nSearch Results")
-        for index, value in enumerate(self.records):
+        if len(self.records) > self.current_page_start + self.OPTIONS['entries per page']:
+            current_page_end = self.current_page_start + self.OPTIONS['entries per page']
+        else:
+            current_page_end = len(self.records) - 1
+        for index in range(self.current_page_start, current_page_end + 1):
+            value = self.records[index]
             short_form = self.display_entry(value, return_only=True)
             print("{}) {}".format(index + 1, short_form))
         
@@ -199,8 +215,68 @@ class Menu:
                 continue
             print(inputs[user_entry]['function'])
             return inputs[user_entry]['function']
+
+    def present_next_result(self):
+        '''Show the next available result'''
+        inputs = {
+            'p' : {'text': 'Previous',
+                   'function': self.previous_result},
+            'n' : {'text': 'Next',
+                   'function': self.next_result},
+            'b' : {'text': 'Back to list view',
+                   'function': self.present_results},
+            'e' : {'text': 'Edit',
+                   'function': self.edit_current_record},
+            'd' : {'text': 'Delete',
+                   'function': self.delete_current_record},
+            'm' : {'text': 'go back to Main menu',
+                   'function': self.main_menu},
+            'q' : {'text': 'quit',
+                   'function': self.quit_program},
+        }
+        if self.current_record == 0:
+            del(inputs['p'])
+        if self.current_record == len(self.records) - 1:
+            del(inputs['n'])
+        print("\nResult {}".format(self.current_record + 1))
+        record = self.records[self.current_record]
+        self.display_entry(record, verbose=True)
         
+        print("\nAvailable actions:")
+        for key, value in inputs.items():
+            print('{}) {}'.format(key, value['text']))
+
+        while True:
+            user_entry = input("> ").lower()
+
+            print(user_entry)
+            print(inputs[user_entry])
+
+            if user_entry not in inputs.keys():
+                continue
+            print(inputs[user_entry]['function'])
+            return inputs[user_entry]['function']
     
+    def previous_result(self):
+        '''load previous result'''
+        self.current_record -= 1
+        return self.present_next_result
+
+    def next_result(self):
+        '''load next result'''
+        self.current_record += 1
+        return self.present_next_result
+    
+    def previous_page(self):
+        '''load previous page of results'''
+        self.current_page_start -= self.OPTIONS['entries per page']
+        return self.present_results
+
+    def next_page(self):
+        '''load next page of results'''
+        self.current_page_start += self.OPTIONS['entries per page']
+        return self.present_results
+
     def search_exact_date(self):
         '''This is the menu where the user browses dates and entries and picks
         the date from a list
@@ -392,12 +468,77 @@ class Menu:
         # save the csv
         csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
         return self.main_menu
+
+    def edit_current_record(self):
+        print("edit record")
+        match_index = self.current_record
+        record = self.records[match_index]
+        # get the new values for the record
+        while True:
+            print("New date of the Task")
+            user_entry = self.date_entry()
+            if user_entry[0] != None:  # error
+                print(user_entry[0])
+                continue
+            else:
+                date = user_entry[1]
+                date_string = self.date_to_string(date, target='file')
+            print("New name of the Task") 
+            input_text = input("Enter the name of the task > ")
+            task_name = input_text
+            print("New time spent")
+            input_text = input("Enter a whole number of minutes (rounded) ")
+            time_spent = input_text
+            print("New notes")
+            input_text = input("(Optional, leave blank for none) ")
+            notes = input_text
+            break
+        # load the csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        # find the row that matches record
+        for row in csv_data:
+            if row == record:
+                print("match: {}".format(row))
+                row[self.HEADERS['date']] = date_string
+                row[self.HEADERS['task_name']] = task_name
+                row[self.HEADERS['duration']] = time_spent
+                row[self.HEADERS['notes']] = notes
+        # save the csv
+        csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
+        return self.main_menu
+
+    
+    def select_detail(self):
+        print("View record")
+        print('enter the record number to view')
+        user_input = input("> ")
+        match_index = int(user_input) - 1
+        self.current_record = match_index
+        return self.present_next_result
     
     def delete_record(self):
         print("delete record")
         print('enter the record number to delete')
         user_input = input("> ")
         match_index = int(user_input) - 1
+        record = self.records[match_index]
+        # load te csv
+        csvm = CsvManager()
+        csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
+        # find the row that matches record
+        for row in csv_data:
+            if row == record:
+                # delete that reow
+                csv_data.remove(row)
+                break
+        # save the csv
+        csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
+        return self.main_menu
+
+    def delete_current_record(self):
+        print("delete record")
+        match_index = self.current_record
         record = self.records[match_index]
         # load te csv
         csvm = CsvManager()
@@ -535,11 +676,6 @@ class Menu:
             return re.search(pattern, row[field_title]) is not None
         
         return [row for row in data_set if check_match(row)]
-
-
-
-
-
 
 
 # ---------------------------
