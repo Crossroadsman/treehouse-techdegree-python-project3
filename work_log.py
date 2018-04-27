@@ -311,7 +311,8 @@ class Menu:
                                                          self.HEADERS['date'],
                                                          selected_date)
         self.records = matching_records
-        return self.present_results()
+        self.current_record = 0
+        return self.present_next_result
 
     def search_date_range(self):
         '''This is the menu where the user can enter a from date and to date
@@ -358,8 +359,12 @@ class Menu:
                                                           date_string)
             current_date = current_date + datetime.timedelta(days=1)
 
+        if len(matching_records) == 0:
+            print("\nNo matches, returning to search menu")
+            return self.search_entries
         self.records = matching_records
-        return self.present_results()
+        self.current_record = 0
+        return self.present_next_result
 
     def search_time_spent(self):
         '''This is the menu where the user enters the number of minutes a task
@@ -386,7 +391,8 @@ class Menu:
             print("\nNo matches, returning to search menu")
             return self.search_entries
         self.records = matching_records
-        return self.present_results()
+        self.current_record = 0
+        return self.present_next_result
 
     def search_text_search(self):
         '''This is the menu where the user enters a text string and is presented
@@ -415,8 +421,12 @@ class Menu:
         for record in matching_records:
             if record not in uniques:
                 uniques += record
+        if len(uniques) == 0:
+            print("\nNo matches, returning to search menu")
+            return self.search_entries
         self.records = uniques
-        return self.present_results()
+        self.current_record = 0
+        return self.present_next_result
 
     def search_regex_search(self):
         '''This menu is just like `search_text_search` except the user provides
@@ -445,8 +455,12 @@ class Menu:
         for record in matching_records:
             if record not in uniques:
                 uniques += record
+        if len(uniques) == 0:
+            print("\nNo matches, returning to search menu")
+            return self.search_entries
         self.records = uniques
-        return self.present_results()
+        self.current_record = 0
+        return self.present_next_result
 
     def edit_record(self):
         print("edit record")
