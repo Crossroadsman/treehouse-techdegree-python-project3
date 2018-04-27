@@ -37,6 +37,8 @@ class Menu:
             'save format (date)': self.DATE_FORMATS['iso 8601'],
             'case sensitive search': False,
             'entries per page': 10,
+            'allow future dates': False,
+            'earliest allowed date': datetime.datetime(1900,1,1),
         }
         self.current_record = 0
         self.current_page_start = 0
@@ -645,6 +647,22 @@ class Menu:
                           "date_format": date_format['UI format']}
             return (error_text.format(**error_args), None)
         else:
+            if not self.OPTIONS['allow future dates']:
+                if naive_datetime > datetime.datetime.now():
+                    error_text = "dates in the future are not permitted"
+                    error_args = {"date_string": date_string,
+                          "date_format": date_format['UI format']}
+                    return (error_text.format(**error_args), None)
+                if naive_datetime < self.OPTIONS['earliest allowed date']:
+                    bad_date = self.OPTIONS['earliest allowed date'].strftime(
+                        self.OPTIONS['date format']['datetime format']
+                    )
+                    error_text = "dates before {} are not permitted".format(
+                        bad_date
+                    )
+                    error_args = {"date_string": date_string,
+                          "date_format": date_format['UI format']}
+                    return (error_text.format(**error_args), None)
             return (None, naive_datetime)
 
     def date_entry(self):
