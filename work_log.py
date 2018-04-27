@@ -9,14 +9,11 @@ class Menu:
     # CONSTANTS
     DATE_FORMATS = {
         'iso 8601': {'UI format': 'yyyy-mm-dd',
-                     'datetime format': '%Y-%m-%d'
-                    },
+                     'datetime format': '%Y-%m-%d'},
         'uk':       {'UI format': 'dd/mm/yyyy',
-                     'datetime format': '%d/%m/%Y'
-                    },
+                     'datetime format': '%d/%m/%Y'},
         'us':       {'UI format': 'mm/dd/yyyy',
-                     'datetime format': '%m/%d/%Y'
-                    },
+                     'datetime format': '%m/%d/%Y'},
     }
 
     HEADERS = {
@@ -27,7 +24,7 @@ class Menu:
     }
 
     DATASTORE_FILENAME = 'work_log.csv'
-    
+
     # STATUS VARIABLES
     quit = False
 
@@ -36,16 +33,16 @@ class Menu:
         print("\nWORK LOG")
         print("========")
         self.OPTIONS = {
-            'date format' : self.DATE_FORMATS['iso 8601'],
-            'save format (date)'  : self.DATE_FORMATS['iso 8601'],
-            'case sensitive search' : False,
-            'entries per page' : 10,
+            'date format': self.DATE_FORMATS['iso 8601'],
+            'save format (date)': self.DATE_FORMATS['iso 8601'],
+            'case sensitive search': False,
+            'entries per page': 10,
         }
         self.current_record = 0
         self.current_page_start = 0
-        
+
         menu = self.main_menu()
-        while self.quit != True:
+        while not self.quit:
             menu = menu()
 
     # MENU METHODS
@@ -54,14 +51,14 @@ class Menu:
         and then the method returns the function for the activity.
         '''
         inputs = {
-            'a' : {'text': 'Add new entry',
-                   'function': self.add_entry},
-            's' : {'text': 'Search in existing entries',
-                   'function': self.search_entries},
-            'o' : {'text': 'Options',
-                   'function': self.options},
-            'q' : {'text': 'Quit program',
-                   'function': self.quit_program}
+            'a': {'text': 'Add new entry',
+                  'function': self.add_entry},
+            's': {'text': 'Search in existing entries',
+                  'function': self.search_entries},
+            'o': {'text': 'Options',
+                  'function': self.options},
+            'q': {'text': 'Quit program',
+                  'function': self.quit_program}
         }
         while True:
             print("\nMAIN MENU")
@@ -72,7 +69,7 @@ class Menu:
 
             if user_entry not in inputs.keys():
                 continue
-            
+
             return inputs[user_entry]['function']
 
     def add_entry(self):
@@ -84,19 +81,20 @@ class Menu:
             while date is None:
                 print("Date of the Task")
                 user_entry = self.date_entry()
-                if user_entry[0] != None:  # error
+                if user_entry[0] is not None:  # error
                     print(user_entry[0])
                     continue
                 else:
                     date = user_entry[1]
                     date_string = self.date_to_string(date, target='file')
-            print("Name of the Task") 
+            print("Name of the Task")
             input_text = input("Enter the name of the task > ")
             task_name = input_text
             time_spent = None
             while time_spent is None:
                 print("Time spent")
-                input_text = input("Enter a whole number of minutes (rounded) ")
+                print("Enter a whole number of minutes (rounded)")
+                input_text = input("> ")
                 try:
                     time_spent = int(input_text)
                 except ValueError:
@@ -146,18 +144,18 @@ class Menu:
         '''This is the search menu. The user selects how they want to search.
         '''
         inputs = {
-            'd' : {'text': 'single Date',
-                   'function': self.search_exact_date},
-            'r' : {'text': 'date Range',
-                   'function': self.search_date_range},
-            't' : {'text': 'Time spent',
-                   'function': self.search_time_spent},
-            's' : {'text': 'text Search',
-                   'function': self.search_text_search},
-            'x' : {'text': 'regeX pattern search',
-                   'function': self.search_regex_search},
-            'b' : {'text': 'Back to main menu',
-                   'function': self.main_menu}
+            'd': {'text': 'single Date',
+                  'function': self.search_exact_date},
+            'r': {'text': 'date Range',
+                  'function': self.search_date_range},
+            't': {'text': 'Time spent',
+                  'function': self.search_time_spent},
+            's': {'text': 'text Search',
+                  'function': self.search_text_search},
+            'x': {'text': 'regeX pattern search',
+                  'function': self.search_regex_search},
+            'b': {'text': 'Back to main menu',
+                  'function': self.main_menu}
         }
         while True:
             print("\nSEARCH ENTRIES")
@@ -179,35 +177,36 @@ class Menu:
         choices
         '''
         inputs = {
-            'n' : {'text': 'Next page',
-                   'function': self.next_page},
-            'p' : {'text': 'Previous page',
-                   'function': self.previous_page},
-            'v' : {'text': 'View detail',
-                   'function': self.select_detail},
-            'e' : {'text': 'Edit',
-                   'function': self.edit_record},
-            'd' : {'text': 'Delete',
-                   'function': self.delete_record},
-            'm' : {'text': 'go back to Main menu',
-                   'function': self.main_menu},
-            'q' : {'text': 'quit',
-                   'function': self.quit_program},
+            'n': {'text': 'Next page',
+                  'function': self.next_page},
+            'p': {'text': 'Previous page',
+                  'function': self.previous_page},
+            'v': {'text': 'View detail',
+                  'function': self.select_detail},
+            'e': {'text': 'Edit',
+                  'function': self.edit_record},
+            'd': {'text': 'Delete',
+                  'function': self.delete_record},
+            'm': {'text': 'go back to Main menu',
+                  'function': self.main_menu},
+            'q': {'text': 'quit',
+                  'function': self.quit_program},
         }
         if self.current_page_start == 0:
             del(inputs['p'])
-        if self.current_page_start + self.OPTIONS['entries per page'] >= len(self.records):
+        next_start = self.current_page_start + self.OPTIONS['entries per page']
+        if next_page_start >= len(self.records):
             del(inputs['n'])
         print("\nSearch Results")
-        if len(self.records) > self.current_page_start + self.OPTIONS['entries per page']:
-            current_page_end = self.current_page_start + self.OPTIONS['entries per page']
+        if len(self.records) > next_start:
+            current_page_end = next_start
         else:
             current_page_end = len(self.records) - 1
         for index in range(self.current_page_start, current_page_end + 1):
             value = self.records[index]
             short_form = self.display_entry(value, return_only=True)
             print("{}) {}".format(index + 1, short_form))
-        
+
         print("\nAvailable actions:")
         for key, value in inputs.items():
             print('{}) {}'.format(key, value['text']))
@@ -222,20 +221,20 @@ class Menu:
     def present_next_result(self):
         '''Show the next available result'''
         inputs = {
-            'p' : {'text': 'Previous',
-                   'function': self.previous_result},
-            'n' : {'text': 'Next',
-                   'function': self.next_result},
-            'b' : {'text': 'Back to list view',
-                   'function': self.present_results},
-            'e' : {'text': 'Edit',
-                   'function': self.edit_current_record},
-            'd' : {'text': 'Delete',
-                   'function': self.delete_current_record},
-            'm' : {'text': 'go back to Main menu',
-                   'function': self.main_menu},
-            'q' : {'text': 'quit',
-                   'function': self.quit_program},
+            'p': {'text': 'Previous',
+                  'function': self.previous_result},
+            'n': {'text': 'Next',
+                  'function': self.next_result},
+            'b': {'text': 'Back to list view',
+                  'function': self.present_results},
+            'e': {'text': 'Edit',
+                  'function': self.edit_current_record},
+            'd': {'text': 'Delete',
+                  'function': self.delete_current_record},
+            'm': {'text': 'go back to Main menu',
+                  'function': self.main_menu},
+            'q': {'text': 'quit',
+                  'function': self.quit_program},
         }
         if self.current_record == 0:
             del(inputs['p'])
@@ -244,7 +243,7 @@ class Menu:
         print("\nResult {}".format(self.current_record + 1))
         record = self.records[self.current_record]
         self.display_entry(record, verbose=True)
-        
+
         print("\nAvailable actions:")
         for key, value in inputs.items():
             print('{}) {}'.format(key, value['text']))
@@ -255,7 +254,7 @@ class Menu:
             if user_entry not in inputs.keys():
                 continue
             return inputs[user_entry]['function']
-    
+
     def previous_result(self):
         '''load previous result'''
         self.current_record -= 1
@@ -265,7 +264,7 @@ class Menu:
         '''load next result'''
         self.current_record += 1
         return self.present_next_result
-    
+
     def previous_page(self):
         '''load previous page of results'''
         self.current_page_start -= self.OPTIONS['entries per page']
@@ -306,14 +305,14 @@ class Menu:
             except IndexError:
                 print("Value out of range. Try again.")
                 continue
-            
+
             # when a date is selected, show all the entries with that date
             matching_records = self.get_matching_records(csv_data,
                                                          self.HEADERS['date'],
                                                          selected_date)
         self.records = matching_records
         return self.present_results()
-    
+
     def search_date_range(self):
         '''This is the menu where the user can enter a from date and to date
         and get back every entry from within that range
@@ -325,7 +324,7 @@ class Menu:
         while start_date is None:
             print("Start Date:")
             user_entry = self.date_entry()
-            if user_entry[0] != None:  # error
+            if user_entry[0] is not None:  # error
                 print(user_entry[0])
                 continue
             else:
@@ -334,7 +333,7 @@ class Menu:
         while end_date is None:
             print("End Date:")
             user_entry = self.date_entry()
-            if user_entry[0] != None:  # error
+            if user_entry[0] is not None:  # error
                 print(user_entry[0])
                 continue
             else:
@@ -358,10 +357,10 @@ class Menu:
                                                           self.HEADERS['date'],
                                                           date_string)
             current_date = current_date + datetime.timedelta(days=1)
-        
+
         self.records = matching_records
         return self.present_results()
-    
+
     def search_time_spent(self):
         '''This is the menu where the user enters the number of minutes a task
         took and be able to choose one to see entries from
@@ -418,7 +417,7 @@ class Menu:
                 uniques += record
         self.records = uniques
         return self.present_results()
-    
+
     def search_regex_search(self):
         '''This menu is just like `search_text_search` except the user provides
         a regex pattern instead of a text string
@@ -460,13 +459,13 @@ class Menu:
         while date is None:
             print("New date of the Task")
             user_entry = self.date_entry()
-            if user_entry[0] != None:  # error
+            if user_entry[0] is not None:  # error
                 print(user_entry[0])
                 continue
             else:
                 date = user_entry[1]
                 date_string = self.date_to_string(date, target='file')
-        print("New name of the Task") 
+        print("New name of the Task")
         input_text = input("Enter the name of the task > ")
         task_name = input_text
         time_spent = None
@@ -504,13 +503,13 @@ class Menu:
         while date is None:
             print("New date of the Task")
             user_entry = self.date_entry()
-            if user_entry[0] != None:  # error
+            if user_entry[0] is not None:  # error
                 print(user_entry[0])
                 continue
             else:
                 date = user_entry[1]
                 date_string = self.date_to_string(date, target='file')
-        print("New name of the Task") 
+        print("New name of the Task")
         input_text = input("Enter the name of the task > ")
         task_name = input_text
         time_spent = None
@@ -539,7 +538,6 @@ class Menu:
         csvm.save_csv(csv_data, self.DATASTORE_FILENAME, truncate=True)
         return self.main_menu
 
-    
     def select_detail(self):
         print("View record")
         print('enter the record number to view')
@@ -547,7 +545,7 @@ class Menu:
         match_index = int(user_input) - 1
         self.current_record = match_index
         return self.present_next_result
-    
+
     def delete_record(self):
         print("delete record")
         print('enter the record number to delete')
@@ -587,7 +585,8 @@ class Menu:
     # Other UI Methods
     def display_entry(self, entry, verbose=False, return_only=False):
         '''This method displays a selected entry, showing:
-        - date (read from file in iso 8601 and displayed in whatever is set in options)
+        - date (read from file in iso 8601 and displayed in whatever is set in
+          options)
         - task name
         - time taken
         - any notes
@@ -597,7 +596,7 @@ class Menu:
         time_taken = entry[self.HEADERS['duration']]
         notes = entry[self.HEADERS['notes']]
         if verbose:
-            line1 = "{}: {}".format(date, task_name) 
+            line1 = "{}: {}".format(date, task_name)
             print(line1)
             print("-" * len(line1))
             print("{} minutes".format(time_taken))
@@ -617,21 +616,23 @@ class Menu:
         '''Takes a date_string and date_format and attempts to create
         a valid datetime object with those imports.
         Returns a tuple in the form (error, datetime) where:
-        - `error` is None if valid and a description of the error text if 
+        - `error` is None if valid and a description of the error text if
           invalid;
         - `datetime` is a datetime object if valid and None if invalid
         '''
         try:
-            naive_datetime = datetime.datetime.strptime(date_string, 
-                                                        date_format['datetime format'])
+            naive_datetime = datetime.datetime.strptime(
+                date_string,
+                date_format['datetime format']
+            )
         except ValueError:
-            error_text = "{date_string} is not a valid date in the format {date_format}"
+            error_text = "{date_string} is not valid in format {date_format}"
             error_args = {"date_string": date_string,
                           "date_format": date_format['UI format']}
             return (error_text.format(**error_args), None)
         else:
             return (None, naive_datetime)
-    
+
     def date_entry(self):
         '''This helper function asks for a date input in the user's preferred
         format and then returns that date as a naive datetime object
@@ -642,9 +643,9 @@ class Menu:
         # validate date entry
         validated = self.validate_date_entry(user_entry, date_format)
         return validated
-    
+
     def date_to_string(self, date_object, target='display'):
-        '''This helper function takes a naive date object and returns a 
+        '''This helper function takes a naive date object and returns a
         string representation in:
         - `target='display'`: the user's preferred display format
         - `target='file': the save format
@@ -663,10 +664,10 @@ class Menu:
     def get_column(self, data_set, field_title, unique=False):
         '''takes a data set and the name of a column and returns a list of all
         records in that column.
-        
+
         If unique is set to True, returns only unique values (while
         preserving order)'''
-        items = [row[field_title] for row in data_set] 
+        items = [row[field_title] for row in data_set]
         if not unique:
             return items
         else:
@@ -675,13 +676,13 @@ class Menu:
                 if item not in unique_items:
                     unique_items.append(item)
             return unique_items
-    
+
     def get_matching_records(self, data_set, field_title, value):
         '''takes a data set and the name of a column and a value and returns
         all the rows where the specified column has the specified value
         '''
         return [row for row in data_set if row[field_title] == value]
-    
+
     def get_records_containing(self, data_set, field_title, value):
         '''takes a data set, the name of a column, value and returns all
         the rows where the specified value appears in the specified column
@@ -695,7 +696,7 @@ class Menu:
             for row in data_set:
                 if row[field_title].lower().find(value.lower()) >= 0:
                     output_records.append(row)
-        
+
         return output_records
 
     def get_records_with_pattern(self, data_set, field_title, pattern):
@@ -705,9 +706,8 @@ class Menu:
         '''
         def check_match(row):
             return re.search(pattern, row[field_title]) is not None
-        
-        return [row for row in data_set if check_match(row)]
 
+        return [row for row in data_set if check_match(row)]
 
 # ---------------------------
 
