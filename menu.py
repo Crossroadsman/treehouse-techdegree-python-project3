@@ -455,7 +455,8 @@ class Menu:
         match_index = int(user_input) - 1
         record = self.records[match_index]
         # get the new values for the record
-        while True:
+        date = None
+        while date is None:
             print("New date of the Task")
             user_entry = self.date_entry()
             if user_entry[0] != None:  # error
@@ -464,16 +465,21 @@ class Menu:
             else:
                 date = user_entry[1]
                 date_string = self.date_to_string(date, target='file')
-            print("New name of the Task") 
-            input_text = input("Enter the name of the task > ")
-            task_name = input_text
+        print("New name of the Task") 
+        input_text = input("Enter the name of the task > ")
+        task_name = input_text
+        time_spent = None
+        while time_spent is None:
             print("New time spent")
             input_text = input("Enter a whole number of minutes (rounded) ")
-            time_spent = input_text
-            print("New notes")
-            input_text = input("(Optional, leave blank for none) ")
-            notes = input_text
-            break
+            try:
+                time_spent = int(input_text)
+            except ValueError:
+                print("Invalid value")
+                continue
+        print("New notes")
+        input_text = input("(Optional, leave blank for none) ")
+        notes = input_text
         # load the csv
         csvm = CsvManager()
         csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
@@ -494,7 +500,8 @@ class Menu:
         match_index = self.current_record
         record = self.records[match_index]
         # get the new values for the record
-        while True:
+        date = None
+        while date is None:
             print("New date of the Task")
             user_entry = self.date_entry()
             if user_entry[0] != None:  # error
@@ -503,16 +510,21 @@ class Menu:
             else:
                 date = user_entry[1]
                 date_string = self.date_to_string(date, target='file')
-            print("New name of the Task") 
-            input_text = input("Enter the name of the task > ")
-            task_name = input_text
+        print("New name of the Task") 
+        input_text = input("Enter the name of the task > ")
+        task_name = input_text
+        time_spent = None
+        while time_spent is None:
             print("New time spent")
             input_text = input("Enter a whole number of minutes (rounded) ")
-            time_spent = input_text
-            print("New notes")
-            input_text = input("(Optional, leave blank for none) ")
-            notes = input_text
-            break
+            try:
+                time_spent = int(input_text)
+            except ValueError:
+                print("Invalid value")
+                continue
+        print("New notes")
+        input_text = input("(Optional, leave blank for none) ")
+        notes = input_text
         # load the csv
         csvm = CsvManager()
         csv_data = csvm.load_csv(self.DATASTORE_FILENAME)
